@@ -1,0 +1,94 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "62a4c8ef-9843-43a0-9e07-7ab8c9ca2c06",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://jsonplaceholder.typicode.com/todos/2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "f1612039-99f9-45ef-a544-a8d152815f47",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "71865181-6feb-4283-b53a-3df6758efe7f",
+              "name": "유저아이디",
+              "value": "={{ $json.userId }}",
+              "type": "number"
+            },
+            {
+              "id": "70be255f-e385-424b-abf5-8dd02deea367",
+              "name": "타이틀",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "feb84c96-30d1-4e71-b722-d9cc7c871994",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a8aa4992-86b8-48bd-9263-66e4e1010c9b",
+  "meta": {
+    "instanceId": "e5b960426ec04bcbbe5c1e179d15cca807de4b74c76308f11e7227abb0613b73"
+  },
+  "id": "avmBRxoDUk5EC6HH",
+  "tags": []
+}
