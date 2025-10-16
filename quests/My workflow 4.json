@@ -1,0 +1,195 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "8382260088",
+        "text": "=n8n에서 보냅니다.\nxml 형식입니다.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -144,
+        -192
+      ],
+      "id": "7fd56aad-16ff-4315-a895-72ca74890ce4",
+      "name": "Send a text message",
+      "webhookId": "4af1a56d-a954-444f-a62a-3a142a099ebc",
+      "credentials": {
+        "telegramApi": {
+          "id": "H8FJ5X3ekVb8FYGv",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -816,
+        -192
+      ],
+      "id": "f0eb84cb-8f24-42ad-b03d-e46b2d588936",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://www.yna.co.kr/rss/industry.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -592,
+        16
+      ],
+      "id": "bb3dd93f-f58c-40b0-bda8-9e6ea33916e0",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "maxItems": 2
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        16
+      ],
+      "id": "89eba158-9395-4bfe-9cc0-76254dbac9b6",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "chatId": "8382260088",
+        "text": "=n8n에서 보냅니다.\n제목 : {{ $json.title }}\n발행일 : {{ $json.pubDate }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -144,
+        16
+      ],
+      "id": "b458283b-17c6-407b-bf10-1c4e09936c96",
+      "name": "Send a text message1",
+      "webhookId": "4af1a56d-a954-444f-a62a-3a142a099ebc",
+      "credentials": {
+        "telegramApi": {
+          "id": "H8FJ5X3ekVb8FYGv",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.yna.co.kr/rss/international.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -592,
+        -192
+      ],
+      "id": "0d498db7-b69a-4503-9ac5-36495903bd8f",
+      "name": "RSS Read1"
+    },
+    {
+      "parameters": {
+        "maxItems": 2
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -192
+      ],
+      "id": "1c9f5fc9-e73e-44a8-be4e-ce059204029b",
+      "name": "Limit1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Limit1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "41731c55-b483-46b6-85ea-c794410ed108",
+  "meta": {
+    "instanceId": "e5b960426ec04bcbbe5c1e179d15cca807de4b74c76308f11e7227abb0613b73"
+  },
+  "id": "UjlfljwdtWwvtgHy",
+  "tags": []
+}
