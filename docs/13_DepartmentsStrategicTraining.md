@@ -42,12 +42,11 @@ https://drive.google.com/file/d/1rGddTiP6GC5yMTgcpPIpXg5-Grbz3vYd/view?usp=shari
 
 -----
 
-```markdown
+
 # 2025년 교육훈련 마스터플랜 수립 보고
 
 임원진 승인을 위한 2024년 역량평가 결과 및 2025년 부서별 요구사항 분석 기반 마스터플랜입니다.
 
----
 
 ### 1. 2025년 부서별 교육훈련 분석사항
 
@@ -116,4 +115,4 @@ https://drive.google.com/file/d/1rGddTiP6GC5yMTgcpPIpXg5-Grbz3vYd/view?usp=shari
 
 2025년 교육훈련 마스터플랜은 총 **15억 원**의 예산 내에서 운영됩니다.
 본 계획은 부서별 핵심 요청사항과 전사 역량평가 결과를 반영하였으며, **전사 전략 방향(디지털, 리더십)**과 일치하므로 승인을 요청 드립니다.
-```
+
