@@ -1,0 +1,552 @@
+```
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영상 리뷰 대시보드 (프로토타입)</title>
+    <style>
+        /* --- [CSS] 10년차 개발자의 빠르고 명확한 스타일시트 --- */
+        
+        /* 1. 기본 및 다크 모드 (디자인팀 요구) */
+        :root {
+            --bg-dark: #1a1b1e;
+            --bg-light: #2c2d30;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a9a9a9;
+            --border-color: #444;
+            --accent-green: #28a745;
+            --accent-red: #dc3545;
+            --accent-blue: #007bff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+                Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        /* 2. 레이아웃 (기획/운영팀 조율) */
+        .container {
+            display: flex;
+            flex-wrap: wrap; /* 모바일 반응형을 위해 추가 */
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .review-panel {
+            flex: 3; /* 너비 비율 (60%) */
+            min-width: 400px; /* 최소 너비 */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar {
+            flex: 2; /* 너비 비율 (40%) */
+            min-width: 300px; /* 최소 너비 */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .widget {
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .widget-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        /* 3. 왼쪽 영역: 영상 플레이어 (직관적 UI) */
+        .video-player video {
+            width: 100%;
+            height: auto; /* 비율 유지 */
+            border-radius: 4px;
+            background-color: #000;
+        }
+
+        /* 4. 왼쪽 영역: 타임스탬프 댓글 (직관적 UI) */
+        #comment-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .comment {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comment:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .comment-user {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .comment-time {
+            font-weight: 600;
+            color: var(--accent-blue);
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+         .comment-time:hover {
+            background-color: var(--border-color);
+         }
+
+        .comment-text {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            word-break: break-all; /* 긴 텍스트 줄바꿈 */
+        }
+
+        #comment-form {
+            display: flex;
+            flex-wrap: wrap; /* 모바일 반응형 */
+            gap: 10px;
+        }
+
+        #comment-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-width: 100px; /* 최소 너비 */
+        }
+        
+        #comment-form input[type="text"]:first-child {
+            flex-grow: 1;
+        }
+        #comment-form input[type="text"]:nth-child(2) {
+            flex-grow: 3;
+        }
+
+
+        #comment-form button {
+            padding: 10px 15px;
+            flex-shrink: 0; /* 버튼 크기 유지 */
+        }
+
+        /* 5. 오른쪽 영역: 승인/반려 버튼 */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-approve {
+            background-color: var(--accent-green);
+            color: white;
+        }
+
+        .btn-reject {
+            background-color: var(--accent-red);
+            color: white;
+        }
+        
+        .btn-submit {
+             background-color: var(--accent-blue);
+             color: white;
+        }
+        
+        /* 6. 오른쪽 영역: 리뷰 목록 (데이터 밀집형) */
+        .video-list {
+            overflow-x: auto; /* 테이블이 넘칠 경우 스크롤 */
+        }
+        .video-list table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 400px; /* 최소 너비 보장 */
+        }
+
+        .video-list th,
+        .video-list td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap; /* 테이블 내용 줄바꿈 방지 */
+        }
+
+        .video-list th {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .video-list td {
+            color: var(--text-primary);
+        }
+
+        .video-list tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .video-list tbody tr:hover {
+            background-color: var(--bg-dark);
+        }
+
+        /* 상태값 배지 스타일 */
+        .status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-Pending {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .status-Approved {
+            background-color: var(--accent-green);
+            color: white;
+        }
+        .status-Rejected {
+            background-color: var(--accent-red);
+            color: white;
+        }
+        
+        /* 알림 메시지 (alert 대체) */
+        #alert-message {
+            display: none; /* 평소엔 숨김 */
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: white;
+            z-index: 1000;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        #alert-message.success {
+            background-color: var(--accent-green);
+        }
+        #alert-message.error {
+            background-color: var(--accent-red);
+        }
+
+
+    </style>
+</head>
+<body>
+    <!-- alert() 대체를 위한 알림 메시지 영역 -->
+    <div id="alert-message"></div>
+
+    <div class="container">
+        <!-- ========================== -->
+        <!--     왼쪽 영역 (60%)         -->
+        <!-- ========================== -->
+        <div class="review-panel">
+            
+            <!-- 1. 영상 플레이어 -->
+            <div class="widget">
+                <h2 class="widget-title" id="video-title">신규 CF (A안)</h2>
+                <div class="video-player">
+                    <!-- 실제 영상 대신 플레이스홀더 사용 -->
+                    <video controls muted poster="https://placehold.co/1600x900/000000/cccccc?text=Video+Player" id="main-video">
+                        <!-- <source src="path/to/video.mp4" type="video/mp4"> -->
+                        브라우저가 video 태그를 지원하지 않습니다.
+                    </video>
+                </div>
+            </div>
+
+            <!-- 2. 타임스탬프 댓글 -->
+            <div class="widget">
+                <h2 class="widget-title">타임스탬프 리뷰</h2>
+                
+                <!-- 댓글 리스트 (JS로 채워짐) -->
+                <div id="comment-list">
+                    <!-- JS로 채워짐 -->
+                </div>
+                
+                <!-- 댓글 입력 폼 -->
+                <form id="comment-form">
+                    <input type="text" id="comment-time-input" placeholder="시간 (예: 01:30)">
+                    <input type="text" id="comment-text-input" placeholder="리뷰 코멘트를 입력하세요..." required>
+                    <button type="submit" class="btn btn-submit">입력</button>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- ========================== -->
+        <!--     오른쪽 영역 (40%)       -->
+        <!-- ========================== -->
+        <div class="sidebar">
+
+            <!-- 3. 승인/반려 버튼 -->
+            <div class="widget">
+                <h2 class="widget-title">리뷰 상태 변경</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-approve" id="approve-btn">✔ Approve</button>
+                    <button class="btn btn-reject" id="reject-btn">✖ Reject</button>
+                </div>
+            </div>
+            
+            <!-- 4. 리뷰 영상 목록 -->
+            <div class="widget video-list">
+                <h2 class="widget-title">전체 리뷰 목록</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>영상 제목</th>
+                            <th>담당자</th>
+                            <th>상태</th>
+                        </tr>
+                    </thead>
+                    <!-- JS로 채워질 테이블 본문 -->
+                    <tbody id="video-list-body">
+                        <!-- JS로 채워짐 -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- [JavaScript] 10년차 개발자의 모듈화된 프로토타입 스크립트 ---
+
+        // 1. 모의 데이터 (Prompt에서 제공)
+        const videoList = [
+            { id: 'v001', title: '신규 CF (A안)', manager: '김기획', status: 'Pending' },
+            { id: 'v002', title: '메이킹 필름 (B안)', manager: '이운영', status: 'Approved' },
+            { id: 'v003', title: 'SNS 숏폼 (ver 1.1)', manager: '박디자인', status: 'Rejected' },
+            { id: 'v004', title: '인트로 영상 (최종)', manager: '김기획', status: 'Pending' }
+        ];
+
+        const comments = [
+            { time: '00:15', user: '박디자인', text: '로고 등장 타이밍 0.5초 당겨주세요.' },
+            { time: '01:30', user: '김기획', text: '이 부분 나레이션을 B안으로 교체 검토.' },
+            { time: '02:45', user: '이운영', text: '데이터 고지 화면, 법적 문구 추가 필요.' }
+        ];
+
+        let currentVideoTitle = videoList[0].title; // 현재 선택된 비디오 제목
+
+        // 2. DOM 요소 캐시
+        const videoListBody = document.getElementById('video-list-body');
+        const commentList = document.getElementById('comment-list');
+        const approveBtn = document.getElementById('approve-btn');
+        const rejectBtn = document.getElementById('reject-btn');
+        const commentForm = document.getElementById('comment-form');
+        const mainVideo = document.getElementById('main-video');
+        const videoTitleEl = document.getElementById('video-title');
+        const alertMessageEl = document.getElementById('alert-message');
+        
+        let alertTimeout = null; // 알림 메시지 타임아웃 ID
+
+        /**
+         * [기능] 영상 목록 테이블을 동적으로 생성 (운영팀 요구)
+         */
+        function loadVideoList() {
+            videoListBody.innerHTML = ''; // 기존 내용 초기화
+            videoList.forEach(video => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${video.id}</td>
+                    <td>${video.title}</td>
+                    <td>${video.manager}</td>
+                    <td><span class="status status-${video.status}">${video.status}</span></td>
+                `;
+                // (회의 중 즉석 수정 대비) 테이블 행 클릭 시 제목 변경
+                row.style.cursor = 'pointer';
+                row.addEventListener('click', () => {
+                    currentVideoTitle = video.title;
+                    videoTitleEl.textContent = video.title;
+                    showAppAlert(`'${video.title}' 영상을 선택했습니다.`, 'success');
+                });
+                videoListBody.appendChild(row);
+            });
+        }
+
+        /**
+         * [기능] 댓글 목록을 동적으로 생성 (기획팀 요구)
+         */
+        function loadComments() {
+            commentList.innerHTML = ''; // 기존 내용 초기화
+            comments.forEach(comment => {
+                const commentEl = createCommentElement(comment);
+                commentList.appendChild(commentEl);
+            });
+        }
+
+        /**
+         * [헬퍼] 개별 댓글 DOM 요소를 생성
+         */
+        function createCommentElement(comment) {
+            const el = document.createElement('div');
+            el.className = 'comment';
+            
+            // 시간(time)을 초(seconds)로 변환 (예: '01:30' -> 90)
+            let seconds = 0;
+            if (comment.time.includes(':')) {
+                const timeParts = comment.time.split(':');
+                seconds = (+timeParts[0] * 60) + (+timeParts[1]);
+            } else {
+                seconds = +comment.time; // 숫자만 있을 경우
+            }
+
+            el.innerHTML = `
+                <div class="comment-meta">
+                    <span class="comment-user">${comment.user}</span>
+                    <span class="comment-time" data-time="${seconds}">${comment.time}</span>
+                </div>
+                <div class="comment-text">${escapeHTML(comment.text)}</div>
+            `;
+
+            // 타임스탬프 클릭 이벤트 (프로토타입 기능)
+            el.querySelector('.comment-time').addEventListener('click', () => {
+                const timeInSeconds = el.querySelector('.comment-time').dataset.time;
+                mainVideo.currentTime = timeInSeconds;
+                mainVideo.play();
+                console.log(`영상 시간을 ${timeInSeconds}초로 이동 (프로토타입)`);
+            });
+
+            return el;
+        }
+
+        /**
+         * [기능] 새 댓글 폼 제출 처리 (선택 사항)
+         */
+        function handleCommentSubmit(event) {
+            event.preventDefault(); // 폼 기본 제출 방지
+
+            const timeInput = document.getElementById('comment-time-input');
+            const textInput = document.getElementById('comment-text-input');
+
+            if (!textInput.value) {
+                showAppAlert('댓글 내용을 입력해야 합니다.', 'error');
+                return;
+            }
+
+            const newComment = {
+                time: timeInput.value || '00:00', // 기본값
+                user: '개발자 (나)', // 현재 사용자 (하드코딩)
+                text: textInput.value
+            };
+
+            // 새 댓글을 DOM에 추가
+            const newCommentEl = createCommentElement(newComment);
+            commentList.appendChild(newCommentEl);
+            commentList.scrollTop = commentList.scrollHeight; // 스크롤을 맨 아래로
+            
+            // 폼 초기화
+            timeInput.value = '';
+            textInput.value = '';
+        }
+        
+        /**
+         * [기능] alert()를 대체하는 커스텀 알림 메시지
+         * @param {string} message - 표시할 메시지
+         * @param {'success' | 'error'} type - 알림 타입
+         */
+        function showAppAlert(message, type = 'success') {
+             // 기존 타임아웃이 있다면 취소
+            if (alertTimeout) {
+                clearTimeout(alertTimeout);
+            }
+            
+            alertMessageEl.textContent = message;
+            alertMessageEl.className = type; // 'success' 또는 'error' 클래스 적용
+            alertMessageEl.style.display = 'block';
+
+            // 3초 후에 자동으로 사라짐
+            alertTimeout = setTimeout(() => {
+                alertMessageEl.style.display = 'none';
+            }, 3000);
+        }
+        
+        /**
+         * [헬퍼] XSS 방지를 위한 간단한 HTML 이스케이프 함수
+         */
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, function(match) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[match];
+            });
+        }
+
+
+        /**
+         * [기능] 모든 이벤트 리스너를 설정
+         */
+        function setupEventListeners() {
+            // 승인/반려 버튼 (커스텀 알림 사용)
+            approveBtn.addEventListener('click', () => {
+                showAppAlert(`'${currentVideoTitle}' (이)가 [승인] 처리되었습니다.`, 'success');
+            });
+
+            rejectBtn.addEventListener('click', () => {
+                showAppAlert(`'${currentVideoTitle}' (이)가 [반려] 처리되었습니다.`, 'error');
+            });
+
+            // 댓글 폼 제출
+            commentForm.addEventListener('submit', handleCommentSubmit);
+        }
+
+        /**
+         * [실행] DOM이 로드되면 모든 기능을 초기화
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("네오스트림 프로토타입 로드 완료. 4시 회의 준비.");
+            loadVideoList();
+            loadComments();
+            setupEventListeners();
+        });
+
+    </script>
+</body>
+</html>
+```
